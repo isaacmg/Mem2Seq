@@ -156,7 +156,7 @@ class Mem2Seq(nn.Module):
         # Update parameters with optimizers
         self.encoder_optimizer.step()
         self.decoder_optimizer.step()
-        self.loss += loss.data[0]
+        self.loss += loss.item()
         self.loss_ptr += loss_Ptr.data[0]
         self.loss_vac += loss_Vocab.data[0]
         
