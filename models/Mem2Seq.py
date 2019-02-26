@@ -199,7 +199,7 @@ class Mem2Seq(nn.Module):
             all_decoder_outputs_ptr[t] = decoder_ptr
             topp, toppi = decoder_ptr.data.topk(1)
             top_ptr_i = torch.gather(input_batches[:,:,0],0,Variable(toppi.view(1, -1)))    
-            next_in = [top_ptr_i.squeeze()[i].item() if(toppi.squeeze()[i].item() < input_lengths[i]-1) else topvi.squeeze()[i].item() for i in range(batch_size)]
+            next_in = [top_ptr_i.squeeze()[i].item() if(int(toppi.squeeze()[i].item()) < input_lengths[i]-1) else topvi.squeeze()[i].item() for i in range(batch_size)]
 
             decoder_input = Variable(torch.LongTensor(next_in)) # Chosen word is next input
             if USE_CUDA: decoder_input = decoder_input.cuda()
@@ -207,11 +207,11 @@ class Mem2Seq(nn.Module):
             temp = []
             from_which = []
             for i in range(batch_size):
-                if(toppi.squeeze()[i] < len(p[i])-1 ):
-                    temp.append(p[i][toppi.squeeze()[i]])
+                if(int(toppi.squeeze()[i].item()) < len(p[i])-1 ):
+                    temp.append(p[i][toppi.squeeze()[i].item()])
                     from_which.append('p')
                 else:
-                    ind = topvi.squeeze()[i]
+                    ind = topvi.squeeze()[i].item()
                     if ind == EOS_token:
                         temp.append('<EOS>')
                     else:
