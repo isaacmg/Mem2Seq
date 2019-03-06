@@ -176,6 +176,8 @@ class Mem2Seq(nn.Module):
         all_decoder_outputs_vocab = Variable(torch.zeros(self.max_r, batch_size, self.output_size))
         all_decoder_outputs_ptr = Variable(torch.zeros(self.max_r, batch_size, input_batches.size(0)))
         #all_decoder_outputs_gate = Variable(torch.zeros(self.max_r, batch_size))
+        print("size below")
+        print(batch_size)
         # Move new Variables to CUDA
 
         if USE_CUDA:
