@@ -130,9 +130,9 @@ class Mem2Seq(nn.Module):
                 all_decoder_outputs_vocab[t] = decoder_vacab
                 all_decoder_outputs_ptr[t] = decoder_ptr
                 ## get the correspective word in input
-                top_ptr_i = torch.gather(input_batches[:,:,0],0,Variable(toppi.view(1, -1)))
-                # .item()? is it right here. Also added casting to an int
-                next_in = [top_ptr_i.squeeze()[i].item() if(int(toppi.squeeze()[i].item()) < input_lengths[i]-1) else topvi.squeeze()[i].item() for i in range(batch_size)]
+                top_ptr_i = torch.gather(input_batches[:,:,0], 0, Variable(toppi.view(1, -1))).transpose(0,1)
+                next_in = [top_ptr_i[i].item() if (toppi[i].item() < input_lengths[i]-1) else topvi[i].item() for i in range(batch_size)]
+
                 decoder_input = Variable(torch.LongTensor(next_in)) # Chosen word is next input
                 if USE_CUDA: decoder_input = decoder_input.cuda()
                   
@@ -176,8 +176,6 @@ class Mem2Seq(nn.Module):
         all_decoder_outputs_vocab = Variable(torch.zeros(self.max_r, batch_size, self.output_size))
         all_decoder_outputs_ptr = Variable(torch.zeros(self.max_r, batch_size, input_batches.size(0)))
         #all_decoder_outputs_gate = Variable(torch.zeros(self.max_r, batch_size))
-        print("size below")
-        print(batch_size)
         # Move new Variables to CUDA
 
         if USE_CUDA:
@@ -200,20 +198,20 @@ class Mem2Seq(nn.Module):
             topv, topvi = decoder_vacab.data.topk(1)
             all_decoder_outputs_ptr[t] = decoder_ptr
             topp, toppi = decoder_ptr.data.topk(1)
-            top_ptr_i = torch.gather(input_batches[:,:,0],0,Variable(toppi.view(1, -1)))
-            print(top_ptr_i.size())
-            next_in = [top_ptr_i.squeeze()[i].item() if(int(toppi.squeeze()[i].item()) < input_lengths[i]-1) else topvi.squeeze()[i].item() for i in range(batch_size)]
+            top_ptr_i = torch.gather(input_batches[:,:,0], 0, Variable(toppi.view(1, -1))).transpose(0,1)
+            next_in = [top_ptr_i[i].item() if (toppi[i].item() < input_lengths[i]-1) else topvi[i].item() for i in range(batch_size)]
+
             decoder_input = Variable(torch.LongTensor(next_in)) # Chosen word is next input
             if USE_CUDA: decoder_input = decoder_input.cuda()
 
             temp = []
             from_which = []
             for i in range(batch_size):
-                if(int(toppi.squeeze()[i].item()) < len(p[i])-1 ):
-                    temp.append(p[i][toppi.squeeze()[i].item()])
+                if(toppi[i].item() < len(p[i])-1 ):
+                    temp.append(p[i][toppi[i].item()])
                     from_which.append('p')
                 else:
-                    ind = topvi.squeeze()[i].item()
+                    ind = topvi[i].item()
                     if ind == EOS_token:
                         temp.append('<EOS>')
                     else:
