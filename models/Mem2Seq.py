@@ -39,12 +39,12 @@ class Mem2Seq(nn.Module):
         if path:
             if USE_CUDA:
                 logging.info("MODEL {} LOADED".format(str(path)))
-                self.encoder = torch.load(str(path)+'/enc.th')
-                self.decoder = torch.load(str(path)+'/dec.th')
+                self.encoder = torch.load(str(path)+'/enc.pth')
+                self.decoder = torch.load(str(path)+'/dec.pth')
             else:
                 logging.info("MODEL {} LOADED".format(str(path)))
-                self.encoder = torch.load(str(path)+'/enc.th',lambda storage, loc: storage)
-                self.decoder = torch.load(str(path)+'/dec.th',lambda storage, loc: storage)
+                self.encoder = torch.load(str(path)+'/enc.pth',lambda storage, loc: storage)
+                self.decoder = torch.load(str(path)+'/dec.pth',lambda storage, loc: storage)
         else:
             self.encoder = EncoderMemNN(lang.n_words, hidden_size, n_layers, self.dropout, self.unk_mask)
             self.decoder = DecoderMemNN(lang.n_words, hidden_size, n_layers, self.dropout, self.unk_mask)
@@ -75,8 +75,8 @@ class Mem2Seq(nn.Module):
         directory = 'save/mem2seq-'+name_data+str(self.task)+'HDD'+str(self.hidden_size)+'BSZ'+str(args['batch'])+'DR'+str(self.dropout)+'L'+str(self.n_layers)+'lr'+str(self.lr)+str(dec_type)                 
         if not os.path.exists(directory):
             os.makedirs(directory)
-        torch.save(self.encoder, directory+'/enc.th')
-        torch.save(self.decoder, directory+'/dec.th')
+        torch.save(self.encoder, directory+'/enc.pth')
+        torch.save(self.decoder, directory+'/dec.pth')
         
     def train_batch(self, input_batches, input_lengths, target_batches, 
                     target_lengths, target_index, target_gate, batch_size, clip,
